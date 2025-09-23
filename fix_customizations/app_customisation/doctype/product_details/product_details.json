@@ -6,34 +6,49 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "context",
-  "column_break_bjhe",
+  "category",
+  "parameter",
   "value"
  ],
  "fields": [
   {
-   "fieldname": "context",
-   "fieldtype": "Data",
+   "fieldname": "category",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Context"
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Category",
+   "reqd": 1,
+   "width": "2"
+  },
+  {
+   "fieldname": "parameter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Parameter",
+   "options": "Parameters",
+   "reqd": 1,
+   "width": "2"
   },
   {
    "fieldname": "value",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Value"
-  },
-  {
-   "fieldname": "column_break_bjhe",
-   "fieldtype": "Column Break"
+   "label": "Value",
+   "reqd": 1,
+   "width": "2"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-23 02:09:29.215462",
+ "modified": "2025-09-23 15:59:05.571852",
  "modified_by": "Administrator",
  "module": "App Customisation",
  "name": "Product Details",
