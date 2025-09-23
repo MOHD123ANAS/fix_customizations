@@ -2,12 +2,9 @@ import frappe
 
 @frappe.whitelist()
 def get_item_details():
-    debug_logs = []
     try:
-        debug_logs.append("Step 1: API called successfully.")
-
-        debug_logs.append("Step 2: Running SQL query...")
-        data = frappe.db.sql("""
+        # Step 1: Fetch main item + price
+        items = frappe.db.sql("""
             SELECT DISTINCT
                 ip.item_code,
                 i.item_name,
@@ -19,48 +16,67 @@ def get_item_details():
                 i.stock_uom,
                 i.brand,
                 i.custom_min_qty,
-                i.item_group,
-                itd.context AS tech_context,
-                itd.value   AS tech_value,
-                pd.context  AS prod_context,
-                pd.value    AS prod_value
+                i.item_group
             FROM
                 `tabItem Price` ip
             INNER JOIN
                 `tabItem` i ON ip.item_code = i.name
-            LEFT JOIN
-                `tabTechnical Details` itd ON itd.parent = i.name
-            LEFT JOIN
-                `tabProduct Details` pd ON pd.parent = i.name
             WHERE
                 ip.price_list = 'Standard Selling'
                 AND IFNULL(i.custom_is_this_a_website_item, 0) = 1
         """, as_dict=1)
 
-        debug_logs.append(f"Step 3: Query executed. Records fetched = {len(data)}")
+        if not items:
+            return {"status": "success", "data": []}
 
-        # Fetch all attachments in one go
+        item_codes = [x["item_code"] for x in items]
+
+        # Step 2: Fetch technical details
+        tech_details = frappe.get_all(
+            "Technical Details",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "context", "value"]
+        )
+
+        tech_map = {}
+        for td in tech_details:
+            tech_map.setdefault(td["parent"], []).append({
+                "context": td["context"],
+                "value": td["value"]
+            })
+
+        # Step 3: Fetch product details
+        prod_details = frappe.get_all(
+            "Product Details",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "context", "value"]
+        )
+
+        prod_map = {}
+        for pd in prod_details:
+            prod_map.setdefault(pd["parent"], []).append({
+                "context": pd["context"],
+                "value": pd["value"]
+            })
+
+        # Step 4: Fetch attachments
         attachments = frappe.get_all(
             "File",
-            filters={"attached_to_doctype": "Item"},
+            filters={"attached_to_doctype": "Item", "attached_to_name": ["in", item_codes]},
             fields=["attached_to_name", "file_url", "file_name", "is_private"]
         )
         attachment_map = {}
         for att in attachments:
             attachment_map.setdefault(att["attached_to_name"], []).append(att)
 
-        # Merge attachments into result
-        for row in data:
+        # Step 5: Merge everything
+        for row in items:
+            row["technical_details"] = tech_map.get(row["item_code"], [])
+            row["product_details"] = prod_map.get(row["item_code"], [])
             row["attachments"] = attachment_map.get(row["item_code"], [])
 
-        debug_logs.append("Step 4: Response prepared successfully.")
-
-        return {"status": "success", "data": data}
+        return {"status": "success", "data": items}
 
     except Exception as e:
-        frappe.log_error(f"Error in get_website_items_with_price: {str(e)}", "Custom API Error")
-        debug_logs.append(f"Step X: Error occurred -> {str(e)}")
+        frappe.log_error(f"Error in get_item_details: {str(e)}", "Custom API Error")
         return {"status": "error", "error": str(e)}
-
-    finally:
-        frappe.log_error("\n".join(debug_logs), "DEBUG LOGS - get_website_items_with_price")
