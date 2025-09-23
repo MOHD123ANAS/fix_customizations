@@ -1,0 +1,23 @@
+[
+ {
+  "category_name": "Product Details",
+  "docstatus": 0,
+  "doctype": "Category",
+  "modified": "2025-09-23 16:20:20.414874",
+  "name": "Product Details"
+ },
+ {
+  "category_name": "Additional Details",
+  "docstatus": 0,
+  "doctype": "Category",
+  "modified": "2025-09-23 16:03:07.612966",
+  "name": "Additional Details"
+ },
+ {
+  "category_name": "Technical Details",
+  "docstatus": 0,
+  "doctype": "Category",
+  "modified": "2025-09-23 15:44:04.378635",
+  "name": "Technical Details"
+ }
+]

@@ -1,0 +1,58 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:07:18.417376",
+  "name": "Net Quantity",
+  "parameter_label": "Net Quantity"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:20:32.639001",
+  "name": "Battery",
+  "parameter_label": "Battery"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:01:54.967835",
+  "name": "Screen",
+  "parameter_label": "Screen"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:06:25.477464",
+  "name": "Importer",
+  "parameter_label": "Importer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:12:52.795679",
+  "name": "Storage",
+  "parameter_label": "Storage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:14:55.908303",
+  "name": "Resolution",
+  "parameter_label": "Resolution"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:01:07.678117",
+  "name": "Brand",
+  "parameter_label": "Brand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Parameters",
+  "modified": "2025-09-23 16:01:37.947376",
+  "name": "Colour",
+  "parameter_label": "Colour"
+ }
+]
