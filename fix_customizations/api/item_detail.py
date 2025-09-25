@@ -4,7 +4,7 @@ from collections import defaultdict
 @frappe.whitelist()
 def get_item_details():
     try:
-        # URL filters
+        
         filters = {}
         if frappe.form_dict.get("item_code"):
             filters["name"] = frappe.form_dict.get("item_code")
@@ -15,7 +15,7 @@ def get_item_details():
 
         filters["custom_is_this_a_website_item"] = 1
 
-        # Fetch items
+        
         items = frappe.get_all(
             "Item",
             filters=filters,
@@ -37,14 +37,14 @@ def get_item_details():
 
         item_codes = [x["item_code"] for x in items]
 
-        # Product Details
+        
         prod_details = frappe.get_all(
             "Product Details",
             filters={"parent": ["in", item_codes]},
             fields=["parent", "parameter", "value", "category"]
         )
 
-        # Group product details by category
+        
         prod_map = {}
         for pd in prod_details:
             parent = pd["parent"]
@@ -54,7 +54,7 @@ def get_item_details():
                 "value": pd.get("value")
             })
 
-        # Attachments
+        
         attachments = frappe.get_all(
             "File",
             filters={"attached_to_doctype": "Item", "attached_to_name": ["in", item_codes]},
@@ -64,10 +64,33 @@ def get_item_details():
         for att in attachments:
             attachment_map.setdefault(att["attached_to_name"], []).append(att)
 
-        # Merge product details and attachments
+        
+        price_list = "Standard Selling"
+        prices = frappe.get_all(
+            "Item Price",
+            filters={"price_list": price_list, "item_code": ["in", item_codes]},
+            fields=["item_code", "price_list_rate"]
+        )
+        price_map = {p["item_code"]: p["price_list_rate"] for p in prices}
+
+        
+        group_map = {}
+        for row in items:
+            ig = row.get("item_group")
+            parent_group, child_group = None, ig
+            if ig:
+                parent_group = frappe.db.get_value("Item Group", ig, "parent_item_group")
+            group_map[ig] = {
+                "parent_category": parent_group,
+                "child_category": child_group
+            }
+
+        
         for row in items:
             row["product_details"] = prod_map.get(row["item_code"], {})
             row["attachments"] = attachment_map.get(row["item_code"], [])
+            row["selling_price"] = price_map.get(row["item_code"])
+            row["categories"] = group_map.get(row["item_group"], {})
 
         return {"status": "success", "data": items}
 
