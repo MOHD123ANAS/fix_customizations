@@ -9,16 +9,21 @@ app_license = "mit"
 # ------------------
 after_migrate = [
     "fix_customizations.customization.item_customization.create_custom_fields",
-    "fix_customizations.customization.supplier_customization.create_custom_fields"
+    "fix_customizations.customization.supplier_customization.create_custom_fields",
+    "fix_customizations.customization.pricing_rule_customize.create_custom_fields"
 ]
 fixtures =[
     "Parameters",
     "Category"
 ]
 after_install = ["fix_customizations.customization.item_customization.create_custom_fields",
-                 "fix_customizations.customization.supplier_customization.create_custom_fields"]
+                 "fix_customizations.customization.supplier_customization.create_custom_fields",
+                 "fix_customizations.customization.pricing_rule_customize.create_custom_fields"
+]
 before_uninstall = ["fix_customizations.customization.item_customization.delete_custom_fields",
-                    "fix_customizations.customization.supplier_customization.delete_custom_fields"
+                    "fix_customizations.customization.supplier_customization.delete_custom_fields",
+                    "fix_customizations.customization.pricing_rule_customize.delete_custom_fields"
+
 ]
 # required_apps = []
 
