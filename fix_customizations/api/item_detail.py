@@ -4,7 +4,6 @@ from collections import defaultdict
 @frappe.whitelist()
 def get_item_details():
     try:
-        
         filters = {}
         if frappe.form_dict.get("item_code"):
             filters["name"] = frappe.form_dict.get("item_code")
@@ -44,7 +43,6 @@ def get_item_details():
             fields=["parent", "parameter", "value", "category"]
         )
 
-        
         prod_map = {}
         for pd in prod_details:
             parent = pd["parent"]
@@ -86,11 +84,25 @@ def get_item_details():
             }
 
         
+        tax_rows = frappe.get_all(
+            "Item Tax",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "item_tax_template"]
+        )
+
+        gst_map = {}
+        for tr in tax_rows:
+            if tr.get("item_tax_template"):
+                gst_rate = frappe.db.get_value("Item Tax Template", tr["item_tax_template"], "gst_rate")
+                gst_map[tr["parent"]] = gst_rate
+
+        
         for row in items:
             row["product_details"] = prod_map.get(row["item_code"], {})
             row["attachments"] = attachment_map.get(row["item_code"], [])
             row["selling_price"] = price_map.get(row["item_code"])
             row["categories"] = group_map.get(row["item_group"], {})
+            row["gst_rate"] = gst_map.get(row["item_code"])  
 
         return {"status": "success", "data": items}
 
