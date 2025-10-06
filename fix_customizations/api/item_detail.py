@@ -35,6 +35,7 @@ def get_item_details():
 
         item_codes = [x["item_code"] for x in items]
 
+        
         prod_details = frappe.get_all(
             "Product Details",
             filters={"parent": ["in", item_codes]},
@@ -50,6 +51,7 @@ def get_item_details():
                 "value": pd.get("value")
             })
 
+        
         attachments = frappe.get_all(
             "File",
             filters={"attached_to_doctype": "Item", "attached_to_name": ["in", item_codes]},
@@ -59,6 +61,7 @@ def get_item_details():
         for att in attachments:
             attachment_map.setdefault(att["attached_to_name"], []).append(att)
 
+        
         price_list = "Standard Selling"
         prices = frappe.get_all(
             "Item Price",
@@ -67,6 +70,7 @@ def get_item_details():
         )
         price_map = {p["item_code"]: p["price_list_rate"] for p in prices}
 
+        
         group_map = {}
         for row in items:
             ig = row.get("item_group")
@@ -78,12 +82,12 @@ def get_item_details():
                 "child_category": child_group
             }
 
+        
         tax_rows = frappe.get_all(
             "Item Tax",
             filters={"parent": ["in", item_codes]},
             fields=["parent", "item_tax_template"]
         )
-
         gst_map = {}
         item_tax_template_map = {}
         for tr in tax_rows:
@@ -92,6 +96,20 @@ def get_item_details():
                 gst_map[tr["parent"]] = gst_rate
                 item_tax_template_map[tr["parent"]] = tr["item_tax_template"]
 
+        
+        discount_map = {}
+        pricing_rules = frappe.get_all(
+            "Pricing Rule",
+            filters={"is_fixed_discount": 1},
+            fields=["name", "discount_percentage"]
+        )
+        for rule in pricing_rules:
+            rule_doc = frappe.get_doc("Pricing Rule", rule["name"])
+            for d in rule_doc.items:
+                existing = discount_map.get(d.item_code, 0)
+                discount_map[d.item_code] = max(existing, rule["discount_percentage"])
+
+        
         for row in items:
             row["product_details"] = prod_map.get(row["item_code"], {})
             row["attachments"] = attachment_map.get(row["item_code"], [])
@@ -99,6 +117,8 @@ def get_item_details():
             row["categories"] = group_map.get(row["item_group"], {})
             row["gst_rate"] = gst_map.get(row["item_code"], 0)
             row["item_tax_template_id"] = item_tax_template_map.get(row["item_code"])
+            
+            row["discount_percentage"] = discount_map.get(row["item_code"]) or None
 
         return {"status": "success", "data": items}
 
