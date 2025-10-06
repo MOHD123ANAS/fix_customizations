@@ -14,7 +14,6 @@ def get_item_details():
 
         filters["custom_is_this_a_website_item"] = 1
 
-        
         items = frappe.get_all(
             "Item",
             filters=filters,
@@ -36,7 +35,6 @@ def get_item_details():
 
         item_codes = [x["item_code"] for x in items]
 
-        
         prod_details = frappe.get_all(
             "Product Details",
             filters={"parent": ["in", item_codes]},
@@ -52,7 +50,6 @@ def get_item_details():
                 "value": pd.get("value")
             })
 
-        
         attachments = frappe.get_all(
             "File",
             filters={"attached_to_doctype": "Item", "attached_to_name": ["in", item_codes]},
@@ -62,7 +59,6 @@ def get_item_details():
         for att in attachments:
             attachment_map.setdefault(att["attached_to_name"], []).append(att)
 
-        
         price_list = "Standard Selling"
         prices = frappe.get_all(
             "Item Price",
@@ -71,7 +67,6 @@ def get_item_details():
         )
         price_map = {p["item_code"]: p["price_list_rate"] for p in prices}
 
-        
         group_map = {}
         for row in items:
             ig = row.get("item_group")
@@ -83,7 +78,6 @@ def get_item_details():
                 "child_category": child_group
             }
 
-        
         tax_rows = frappe.get_all(
             "Item Tax",
             filters={"parent": ["in", item_codes]},
@@ -91,18 +85,20 @@ def get_item_details():
         )
 
         gst_map = {}
+        item_tax_template_map = {}
         for tr in tax_rows:
             if tr.get("item_tax_template"):
                 gst_rate = frappe.db.get_value("Item Tax Template", tr["item_tax_template"], "gst_rate")
                 gst_map[tr["parent"]] = gst_rate
+                item_tax_template_map[tr["parent"]] = tr["item_tax_template"]
 
-        
         for row in items:
             row["product_details"] = prod_map.get(row["item_code"], {})
             row["attachments"] = attachment_map.get(row["item_code"], [])
             row["selling_price"] = price_map.get(row["item_code"])
             row["categories"] = group_map.get(row["item_group"], {})
-            row["gst_rate"] = gst_map.get(row["item_code"])  
+            row["gst_rate"] = gst_map.get(row["item_code"], 0)
+            row["item_tax_template_id"] = item_tax_template_map.get(row["item_code"])
 
         return {"status": "success", "data": items}
 
