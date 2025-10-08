@@ -11,6 +11,14 @@ def create_custom_fields():
                 "options":"Product Details",
                 "insert_after": "description",
                 
+            },
+                {
+                "fieldname": "product_description",
+                "fieldtype": "Table",
+                "label": "Product Description",
+                "options":"Product Description",
+                "insert_after": "product_details",
+                
             }
         ]
     }
@@ -23,7 +31,7 @@ def create_custom_fields():
                 frappe.clear_cache(doctype=doctype)
 
 def delete_custom_fields(): 
-    custom_fields_to_delete = { "Item": ["product_details"]}  
+    custom_fields_to_delete = { "Item": ["product_details","product_description"]}  
 
     for doctype, fields in custom_fields_to_delete.items(): 
         for field_name in fields: 

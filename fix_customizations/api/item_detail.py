@@ -39,7 +39,8 @@ def get_item_details():
         prod_details = frappe.get_all(
             "Product Details",
             filters={"parent": ["in", item_codes]},
-            fields=["parent", "parameter", "value", "category"]
+            fields=["parent", "parameter", "value", "category"],
+            order_by="idx asc"
         )
 
         prod_map = {}
@@ -49,6 +50,26 @@ def get_item_details():
             prod_map[parent][pd.get("category", "Other")].append({
                 "parameter": pd.get("parameter"),
                 "value": pd.get("value")
+            })
+
+        
+        prod_descriptions = frappe.get_all(
+            "Product Description",
+            filters={"parent": ["in", item_codes]},
+            fields=["parent", "title", "description", "image", "alignment"],
+            order_by="idx asc"
+        )
+
+        prod_desc_map = {}
+        for desc in prod_descriptions:
+            parent = desc.get("parent")
+            if not parent:
+                continue
+            prod_desc_map.setdefault(parent, []).append({
+                "title": desc.get("title"),
+                "description": desc.get("description"),
+                "image": desc.get("image"),
+                "alignment": desc.get("alignment")
             })
 
         
@@ -112,12 +133,12 @@ def get_item_details():
         
         for row in items:
             row["product_details"] = prod_map.get(row["item_code"], {})
+            row["product_description"] = prod_desc_map.get(row["item_code"], [])  
             row["attachments"] = attachment_map.get(row["item_code"], [])
             row["selling_price"] = price_map.get(row["item_code"])
             row["categories"] = group_map.get(row["item_group"], {})
             row["gst_rate"] = gst_map.get(row["item_code"], 0)
             row["item_tax_template_id"] = item_tax_template_map.get(row["item_code"])
-            
             row["discount_percentage"] = discount_map.get(row["item_code"]) or None
 
         return {"status": "success", "data": items}
