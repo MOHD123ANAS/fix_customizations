@@ -25,6 +25,11 @@ before_uninstall = ["fix_customizations.customization.item_customization.delete_
                     "fix_customizations.customization.pricing_rule_customize.delete_custom_fields"
 
 ]
+doc_events={
+    "Sales Invoice":{
+        "on_update_after_submit":"fix_customizations.automation.customer_email.send_invoice_delivery_email"
+    }
+}
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page

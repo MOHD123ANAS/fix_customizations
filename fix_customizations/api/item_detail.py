@@ -78,9 +78,22 @@ def get_item_details():
             filters={"attached_to_doctype": "Item", "attached_to_name": ["in", item_codes]},
             fields=["attached_to_name", "file_url", "file_name", "is_private"]
         )
+
         attachment_map = {}
         for att in attachments:
-            attachment_map.setdefault(att["attached_to_name"], []).append(att)
+            item_code = att["attached_to_name"]
+            file_name = (att.get("file_name") or "").lower()
+            file_url_name = (att.get("file_url", "").split("/")[-1] or "").lower()
+            item_code_lower = item_code.lower()
+
+            
+            if (
+                file_name.startswith(item_code_lower)
+                or file_name.startswith(f"{item_code_lower}-")
+                or file_url_name.startswith(item_code_lower)
+                or file_url_name.startswith(f"{item_code_lower}-")
+            ):
+                attachment_map.setdefault(item_code, []).append(att)
 
         
         price_list = "Standard Selling"
@@ -117,7 +130,6 @@ def get_item_details():
                 gst_map[tr["parent"]] = gst_rate
                 item_tax_template_map[tr["parent"]] = tr["item_tax_template"]
 
-        
         discount_map = {}
         pricing_rules = frappe.get_all(
             "Pricing Rule",
